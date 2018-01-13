@@ -7,7 +7,7 @@ export default class InfiniteScroll extends Component {
     super();
     this.state = {
       showLoader: false,
-      lastScrollTop: 0,
+      lastScrollOffset: 0,
       actionTriggered: false,
       pullToRefreshThresholdBreached: false
     };
@@ -84,7 +84,7 @@ export default class InfiniteScroll extends Component {
   }
 
   onStart (evt) {
-    if (this.state.lastScrollTop) return;
+    if (this.state.lastScrollOffset) return;
 
     this.dragging = true;
     this.startY = evt.pageY || evt.touches[0].pageY;
@@ -135,7 +135,7 @@ export default class InfiniteScroll extends Component {
     const clientHeight = (target === document.body || target === document.documentElement)
     ? window.screen.availHeight : target.clientHeight;
 
-    const scrolled = scrollThreshold * (target.scrollHeight - target.scrollTop);
+    const scrolled = scrollThreshold * (this.scrollMax(target) - this.scrollOffset(target));
     return scrolled <= clientHeight;
   }
 
@@ -151,10 +151,10 @@ export default class InfiniteScroll extends Component {
       : (document.documentElement.scrollTop ? document.documentElement : document.body);
 
     // if user scrolls up, remove action trigger lock
-    if (target.scrollTop < this.state.lastScrollTop) {
+    if (this.scrollOffset(target) < this.state.lastScrollOffset) {
       this.setState({
         actionTriggered: false,
-        lastScrollTop: target.scrollTop
+        lastScrollOffset: this.scrollOffset(target)
       });
       return; // user's going up, we don't care
     }
@@ -170,7 +170,15 @@ export default class InfiniteScroll extends Component {
       this.props.next();
       this.setState({actionTriggered: true, showLoader: true});
     }
-    this.setState({lastScrollTop: target.scrollTop});
+    this.setState({lastScrollOffset: this.scrollOffset(target)});
+  }
+
+  scrollOffset (dom) {
+    return dom[this.props.horizontal ? 'scrollLeft' : 'scrollTop']
+  }
+
+  scrollMax (dom) {
+    return dom[this.props.horizontal ? 'scrollWidth' : 'scrollHeight']
   }
 
   render () {
@@ -246,4 +254,5 @@ InfiniteScroll.propTypes = {
   pullDownToRefreshThreshold: PropTypes.number,
   refreshFunction: PropTypes.func,
   onScroll: PropTypes.func,
+  horizontal: PropTypes.bool
 };
