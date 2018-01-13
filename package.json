@@ -1,5 +1,5 @@
 {
-  "name": "react-infinite-scroll-component",
+  "name": "kd-react-infinite-scroll-component",
   "version": "3.0.2",
   "description": "An Infinite Scroll component in react.",
   "main": "lib/index.js",
